@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Kuis Informatika - Sistem Komputer</title>
 
 <style>
@@ -15,12 +14,12 @@
 
 body {
     margin: 0;
-    padding: 20px;
     min-height: 100vh;
+    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg,#141e30,#243b55);
+    background: linear-gradient(135deg,#101827,#1e40af);
 }
 
 .container {
@@ -28,13 +27,13 @@ body {
     width: 100%;
     max-width: 650px;
     padding: 30px;
-    border-radius: 18px;
+    border-radius: 20px;
     box-shadow: 0 10px 30px #0005;
 }
 
 h1 {
     text-align: center;
-    color: #243b55;
+    color: #1e3a8a;
 }
 
 .subtitle {
@@ -43,7 +42,7 @@ h1 {
 }
 
 .info {
-    background: #eaf2ff;
+    background: #eff6ff;
     padding: 15px;
     border-radius: 10px;
     line-height: 1.8;
@@ -54,7 +53,7 @@ button {
     width: 100%;
     padding: 14px;
     border: none;
-    border-radius: 9px;
+    border-radius: 10px;
     background: #2563eb;
     color: white;
     font-size: 16px;
@@ -78,18 +77,14 @@ button:disabled {
     border: 2px solid transparent;
 }
 
-.option:hover {
-    background: #dbeafe;
+.option.correct {
+    background: #bbf7d0;
+    border-color: #16a34a;
 }
 
-.correct {
-    background: #bbf7d0 !important;
-    border-color: #16a34a !important;
-}
-
-.wrong {
-    background: #fecaca !important;
-    border-color: #dc2626 !important;
+.option.wrong {
+    background: #fecaca;
+    border-color: #dc2626;
 }
 
 #quiz, #result {
@@ -105,15 +100,28 @@ button:disabled {
 
 .progress-bar {
     height: 10px;
-    width: 0%;
+    width: 0;
     background: #2563eb;
     border-radius: 10px;
-    transition: .3s;
 }
 
-#question {
-    margin: 25px 0;
-    line-height: 1.5;
+.warning {
+    display: none;
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 15px;
+    border: 2px solid #dc2626;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.score {
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: #2563eb;
 }
 
 #feedback {
@@ -122,24 +130,6 @@ button:disabled {
     margin: 15px 0;
 }
 
-.warning {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #ef4444;
-    padding: 12px;
-    border-radius: 10px;
-    text-align: center;
-    margin: 15px 0;
-    display: none;
-    font-weight: bold;
-}
-
-.score {
-    font-size: 28px;
-    color: #2563eb;
-    text-align: center;
-    font-weight: bold;
-}
 </style>
 </head>
 
@@ -147,23 +137,22 @@ button:disabled {
 
 <div class="container">
 
-<!-- HALAMAN AWAL -->
+<!-- HALAMAN DEPAN -->
 
 <div id="start">
 
 <h1>💻 KUIS INFORMATIKA</h1>
 
-<p class="subtitle">
-Materi Pembelajaran: Sistem Komputer
-</p>
+<p class="subtitle">Materi Sistem Komputer</p>
 
 <div class="info">
 <b>Petunjuk Pengerjaan:</b>
 <p>📌 Jumlah soal: 10</p>
 <p>📌 Bentuk soal: Pilihan ganda</p>
-<p>📌 Pilih satu jawaban yang benar</p>
-<p>📌 Jawaban diperiksa secara otomatis</p>
-<p>📌 Jangan berpindah tab saat mengerjakan</p>
+<p>📌 Pilih jawaban yang benar</p>
+<p>📌 Nilai dihitung otomatis</p>
+<p>📌 Jangan berpindah tab selama kuis</p>
+<p>🔔 Alarm akan berbunyi jika tab ditinggalkan</p>
 </div>
 
 <button onclick="startQuiz()">MULAI KUIS</button>
@@ -178,12 +167,10 @@ Materi Pembelajaran: Sistem Komputer
 <h1>📝 KUIS SISTEM KOMPUTER</h1>
 
 <div class="warning" id="warningBox">
-⚠️ Peringatan: Kamu telah berpindah tab!
+⚠️ PERINGATAN!
 </div>
 
-<p id="warningCount">
-Jumlah peringatan: 0
-</p>
+<p id="warningCount">Jumlah pelanggaran: 0</p>
 
 <p id="number"></p>
 
@@ -208,7 +195,7 @@ SOAL BERIKUTNYA
 
 <div id="result">
 
-<h1>🎉 KUIS SELESAI!</h1>
+<h1>🎉 KUIS SELESAI</h1>
 
 <p class="score" id="score"></p>
 
@@ -216,9 +203,7 @@ SOAL BERIKUTNYA
 
 <p id="finalWarning" style="text-align:center"></p>
 
-<button onclick="restartQuiz()">
-ULANGI KUIS
-</button>
+<button onclick="restartQuiz()">ULANGI KUIS</button>
 
 </div>
 
@@ -326,219 +311,279 @@ let score = 0;
 let answered = false;
 let warningCount = 0;
 let quizActive = false;
+let audioContext = null;
+let alarmTimer = null;
+
+
+// MEMBUAT ALARM SUARA
+
+function playAlarm() {
+
+    try {
+
+        if (!audioContext) {
+            audioContext = new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+        }
+
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = "sawtooth";
+        oscillator.frequency.value = 850;
+
+        gain.gain.value = 0.15;
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start();
+
+        oscillator.stop(audioContext.currentTime + 0.5);
+
+    } catch(error) {
+        console.log("Audio tidak tersedia", error);
+    }
+
+}
 
 
 // MEMULAI KUIS
 
-function startQuiz(){
+function startQuiz() {
 
-current = 0;
-score = 0;
-warningCount = 0;
-answered = false;
-quizActive = true;
+    current = 0;
+    score = 0;
+    warningCount = 0;
+    answered = false;
+    quizActive = true;
 
-document.getElementById("start").style.display = "none";
-document.getElementById("result").style.display = "none";
-document.getElementById("quiz").style.display = "block";
+    // Membuat audio setelah interaksi pengguna
+    try {
+        const AudioClass =
+            window.AudioContext || window.webkitAudioContext;
 
-document.getElementById("warningBox").style.display = "none";
+        if (AudioClass && !audioContext) {
+            audioContext = new AudioClass();
+        }
 
-updateWarning();
+        if (audioContext && audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+    } catch(error) {
+        console.log(error);
+    }
 
-showQuestion();
+    document.getElementById("start").style.display = "none";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+
+    document.getElementById("warningBox").style.display = "none";
+
+    updateWarning();
+    showQuestion();
 
 }
 
 
 // MENAMPILKAN SOAL
 
-function showQuestion(){
+function showQuestion() {
 
-answered = false;
+    answered = false;
 
-let q = questions[current];
+    const q = questions[current];
 
-document.getElementById("number").innerText =
-"Soal " + (current+1) + " dari " + questions.length;
+    document.getElementById("number").innerText =
+        "Soal " + (current + 1) + " dari " + questions.length;
 
-document.getElementById("question").innerText = q.q;
+    document.getElementById("question").innerText = q.q;
 
-document.getElementById("feedback").innerText = "";
+    document.getElementById("feedback").innerText = "";
 
-document.getElementById("bar").style.width =
-(current/questions.length*100)+"%";
+    document.getElementById("bar").style.width =
+        (current / questions.length * 100) + "%";
 
-let options = document.getElementById("options");
+    document.getElementById("next").disabled = true;
 
-options.innerHTML = "";
+    document.getElementById("next").innerText =
+        current === questions.length - 1
+        ? "LIHAT HASIL"
+        : "SOAL BERIKUTNYA";
 
-document.getElementById("next").disabled = true;
+    const options = document.getElementById("options");
 
-document.getElementById("next").innerText =
-current === questions.length-1
-? "LIHAT HASIL"
-: "SOAL BERIKUTNYA";
+    options.innerHTML = "";
 
-q.a.forEach((answer,index)=>{
+    q.a.forEach((answer,index) => {
 
-let btn = document.createElement("button");
+        const btn = document.createElement("button");
 
-btn.innerText =
-String.fromCharCode(65+index)+". "+answer;
+        btn.innerText =
+            String.fromCharCode(65 + index) + ". " + answer;
 
-btn.className = "option";
+        btn.className = "option";
 
-btn.onclick = ()=>checkAnswer(index,btn);
+        btn.onclick = () => checkAnswer(index,btn);
 
-options.appendChild(btn);
+        options.appendChild(btn);
 
-});
+    });
 
 }
 
 
 // MEMERIKSA JAWABAN
 
-function checkAnswer(index,selectedButton){
+function checkAnswer(index,selectedButton) {
 
-if(answered) return;
+    if(answered) return;
 
-answered = true;
+    answered = true;
 
-let correct = questions[current].correct;
+    const correct = questions[current].correct;
 
-let buttons = document.querySelectorAll(".option");
+    const buttons = document.querySelectorAll(".option");
 
-buttons.forEach(btn=>btn.disabled=true);
+    buttons.forEach(btn => btn.disabled = true);
 
-if(index===correct){
+    if(index === correct) {
 
-score++;
+        score++;
 
-selectedButton.classList.add("correct");
+        selectedButton.classList.add("correct");
 
-document.getElementById("feedback").innerText =
-"✅ Jawaban kamu benar!";
+        document.getElementById("feedback").innerText =
+            "✅ Jawaban benar!";
 
-}else{
+    } else {
 
-selectedButton.classList.add("wrong");
+        selectedButton.classList.add("wrong");
 
-buttons[correct].classList.add("correct");
+        buttons[correct].classList.add("correct");
 
-document.getElementById("feedback").innerText =
-"❌ Jawaban salah! Jawaban benar: "+
-questions[current].a[correct];
+        document.getElementById("feedback").innerText =
+            "❌ Jawaban salah! Jawaban benar: " +
+            questions[current].a[correct];
 
-}
+    }
 
-document.getElementById("next").disabled=false;
+    document.getElementById("next").disabled = false;
 
-document.getElementById("bar").style.width =
-((current+1)/questions.length*100)+"%";
-
-}
-
-
-// SOAL BERIKUTNYA
-
-function nextQuestion(){
-
-if(!answered) return;
-
-current++;
-
-if(current<questions.length){
-
-showQuestion();
-
-}else{
-
-showResult();
-
-}
+    document.getElementById("bar").style.width =
+        ((current + 1) / questions.length * 100) + "%";
 
 }
 
 
-// HASIL AKHIR
+// PINDAH SOAL
 
-function showResult(){
+function nextQuestion() {
 
-quizActive = false;
+    if(!answered) return;
 
-document.getElementById("quiz").style.display="none";
+    current++;
 
-document.getElementById("result").style.display="block";
+    if(current < questions.length) {
 
-let nilai = score/questions.length*100;
+        showQuestion();
 
-document.getElementById("score").innerText =
-"Nilai: "+nilai;
+    } else {
 
-document.getElementById("message").innerText =
-nilai>=80
-? "Hebat! Kamu memahami materi Sistem Komputer."
-: nilai>=60
-? "Bagus! Terus tingkatkan kemampuanmu."
-: "Tetap semangat belajar dan coba lagi!";
+        showResult();
 
-document.getElementById("finalWarning").innerText =
-"Jumlah perpindahan tab yang terdeteksi: "+warningCount;
+    }
 
 }
 
 
-// FITUR PERINGATAN PINDAH TAB
+// FITUR ALARM SAAT PINDAH TAB
 
-document.addEventListener("visibilitychange",function(){
+document.addEventListener("visibilitychange", function() {
 
-if(!quizActive) return;
+    if(!quizActive) return;
 
-if(document.visibilityState==="hidden"){
+    if(document.hidden) {
 
-warningCount++;
+        warningCount++;
 
-updateWarning();
+        updateWarning();
 
-}
+        // Bunyi alarm ketika halaman kembali aktif
+        // karena browser bisa membatasi suara di tab tersembunyi
+
+    } else {
+
+        if(quizActive && warningCount > 0) {
+
+            playAlarm();
+
+            document.getElementById("warningBox").style.display = "block";
+
+            document.getElementById("warningBox").innerText =
+                "🚨 ALARM PERINGATAN! Kamu telah berpindah tab! " +
+                "Peringatan ke-" + warningCount;
+
+        }
+
+    }
 
 });
 
 
-// MEMPERBARUI PERINGATAN
+// UPDATE JUMLAH PERINGATAN
 
-function updateWarning(){
+function updateWarning() {
 
-document.getElementById("warningCount").innerText =
-"Jumlah peringatan: "+warningCount;
-
-if(warningCount>0){
-
-let box = document.getElementById("warningBox");
-
-box.style.display="block";
-
-box.innerText =
-"⚠️ PERINGATAN KE-"+warningCount+
-"! Kamu terdeteksi meninggalkan halaman kuis. "+
-"Silakan kembali mengerjakan kuis.";
+    document.getElementById("warningCount").innerText =
+        "Jumlah pelanggaran: " + warningCount;
 
 }
+
+
+// HASIL KUIS
+
+function showResult() {
+
+    quizActive = false;
+
+    document.getElementById("quiz").style.display = "none";
+
+    document.getElementById("result").style.display = "block";
+
+    const nilai = score / questions.length * 100;
+
+    document.getElementById("score").innerText =
+        "Nilai: " + nilai;
+
+    document.getElementById("message").innerText =
+        nilai >= 80
+        ? "Hebat! Kamu memahami materi Sistem Komputer."
+        : nilai >= 60
+        ? "Bagus! Terus tingkatkan kemampuanmu."
+        : "Tetap semangat belajar dan coba lagi!";
+
+    document.getElementById("finalWarning").innerText =
+        "Jumlah perpindahan tab: " + warningCount;
 
 }
 
 
 // MENGULANGI KUIS
 
-function restartQuiz(){
+function restartQuiz() {
 
-quizActive = false;
+    quizActive = false;
 
-document.getElementById("result").style.display="none";
+    document.getElementById("result").style.display = "none";
 
-document.getElementById("start").style.display="block";
+    document.getElementById("start").style.display = "block";
 
 }
 
