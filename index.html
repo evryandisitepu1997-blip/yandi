@@ -1,12 +1,377 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelas Bu Sari</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Informatika - Sistem Komputer</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #141e30, #243b55);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px #0005;
+}
+
+h1 {
+    text-align: center;
+    color: #243b55;
+    margin-bottom: 15px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.info {
+    background: #eaf2ff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.option {
+    background: #f1f5f9;
+    color: #222;
+    border: 2px solid transparent;
+    text-align: left;
+    margin-top: 12px;
+}
+
+.option:hover {
+    background: #dbeafe;
+}
+
+.option:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+.option.correct {
+    background: #bbf7d0;
+    border-color: #16a34a;
+}
+
+.option.wrong {
+    background: #fecaca;
+    border-color: #dc2626;
+}
+
+#quiz, #result {
+    display: none;
+}
+
+.progress {
+    background: #ddd;
+    height: 10px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.progress-bar {
+    background: #2563eb;
+    height: 10px;
+    width: 0%;
+    border-radius: 10px;
+}
+
+#question {
+    margin: 20px 0;
+    line-height: 1.5;
+}
+
+#feedback {
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.score {
+    text-align: center;
+    font-size: 24px;
+    color: #2563eb;
+    margin: 20px;
+}
+</style>
 </head>
+
 <body>
-  <h1>Selamat datang!</h1>
-  <p>Website kelas Fisika.</p>
+
+<div class="container">
+
+    <div id="start">
+        <h1>💻 Kuis Informatika</h1>
+        <p class="subtitle">Materi: Sistem Komputer</p>
+
+        <div class="info">
+            <b>Petunjuk Kuis:</b>
+            <p>📌 Jumlah soal: 10</p>
+            <p>📌 Bentuk soal: Pilihan ganda</p>
+            <p>📌 Pilih satu jawaban yang benar</p>
+            <p>📌 Nilai dihitung secara otomatis</p>
+        </div>
+
+        <button onclick="startQuiz()">Mulai Kuis</button>
+    </div>
+
+    <div id="quiz">
+        <h1>📝 Kerjakan Soal</h1>
+        <p id="number"></p>
+
+        <div class="progress">
+            <div class="progress-bar" id="bar"></div>
+        </div>
+
+        <h3 id="question"></h3>
+        <div id="options"></div>
+
+        <p id="feedback"></p>
+
+        <button id="next" onclick="nextQuestion()" disabled>
+            Soal Berikutnya
+        </button>
+    </div>
+
+    <div id="result">
+        <h1>🎉 Kuis Selesai!</h1>
+        <p class="score" id="score"></p>
+        <p id="message" style="text-align:center"></p>
+        <button onclick="restartQuiz()">Ulangi Kuis</button>
+    </div>
+
+</div>
+
+<script>
+
+const questions = [
+{
+    q: "Apa yang dimaksud dengan sistem komputer?",
+    a: [
+        "Kumpulan perangkat untuk bermain game",
+        "Gabungan hardware, software, dan brainware",
+        "Program untuk mengetik",
+        "Jaringan internet"
+    ],
+    correct: 1
+},
+{
+    q: "Perangkat keras komputer disebut juga...",
+    a: ["Software", "Brainware", "Hardware", "Malware"],
+    correct: 2
+},
+{
+    q: "Manakah yang termasuk perangkat input?",
+    a: ["Monitor", "Printer", "Keyboard", "Speaker"],
+    correct: 2
+},
+{
+    q: "Apa fungsi utama CPU?",
+    a: [
+        "Mencetak dokumen",
+        "Mengolah instruksi dan data",
+        "Menampilkan gambar",
+        "Menyimpan file secara permanen"
+    ],
+    correct: 1
+},
+{
+    q: "RAM merupakan jenis memori yang...",
+    a: [
+        "Menyimpan data sementara",
+        "Menyimpan data secara permanen",
+        "Menghasilkan suara",
+        "Menghubungkan komputer ke internet"
+    ],
+    correct: 0
+},
+{
+    q: "Manakah yang termasuk perangkat output?",
+    a: ["Mouse", "Keyboard", "Scanner", "Monitor"],
+    correct: 3
+},
+{
+    q: "Contoh perangkat lunak sistem adalah...",
+    a: ["Microsoft Word", "Windows", "Photoshop", "PowerPoint"],
+    correct: 1
+},
+{
+    q: "Orang yang menggunakan dan mengoperasikan komputer disebut...",
+    a: ["Hardware", "Software", "Brainware", "Firmware"],
+    correct: 2
+},
+{
+    q: "Apa fungsi motherboard?",
+    a: [
+        "Menghubungkan komponen-komponen komputer",
+        "Mencetak gambar",
+        "Menyimpan listrik",
+        "Menghasilkan suara"
+    ],
+    correct: 0
+},
+{
+    q: "Manakah media penyimpanan data?",
+    a: ["Monitor", "SSD", "Keyboard", "Speaker"],
+    correct: 1
+}
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function startQuiz() {
+    document.getElementById("start").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+    showQuestion();
+}
+
+function showQuestion() {
+    answered = false;
+
+    let q = questions[current];
+
+    document.getElementById("number").innerText =
+        `Soal ${current + 1} dari ${questions.length}`;
+
+    document.getElementById("bar").style.width =
+        ((current) / questions.length * 100) + "%";
+
+    document.getElementById("question").innerText = q.q;
+
+    document.getElementById("feedback").innerText = "";
+
+    document.getElementById("next").disabled = true;
+
+    const options = document.getElementById("options");
+    options.innerHTML = "";
+
+    q.a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+
+        btn.innerText =
+            String.fromCharCode(65 + index) + ". " + answer;
+
+        btn.className = "option";
+
+        btn.onclick = () => checkAnswer(index, btn);
+
+        options.appendChild(btn);
+    });
+}
+
+function checkAnswer(index, selectedButton) {
+    if (answered) return;
+
+    answered = true;
+
+    const correct = questions[current].correct;
+    const buttons = document.querySelectorAll(".option");
+
+    buttons.forEach(btn => btn.disabled = true);
+
+    if (index === correct) {
+        score++;
+        selectedButton.classList.add("correct");
+
+        document.getElementById("feedback").innerText =
+            "✅ Jawaban Benar!";
+    } else {
+        selectedButton.classList.add("wrong");
+        buttons[correct].classList.add("correct");
+
+        document.getElementById("feedback").innerText =
+            "❌ Jawaban Salah! Jawaban yang benar: " +
+            questions[current].a[correct];
+    }
+
+    document.getElementById("next").disabled = false;
+    document.getElementById("bar").style.width =
+        ((current + 1) / questions.length * 100) + "%";
+
+    document.getElementById("next").innerText =
+        current === questions.length - 1
+        ? "Lihat Hasil"
+        : "Soal Berikutnya";
+}
+
+function nextQuestion() {
+    if (!answered) return;
+
+    current++;
+
+    if (current < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").style.display = "block";
+
+    let nilai = score / questions.length * 100;
+
+    document.getElementById("score").innerText =
+        `Nilai Kamu: ${nilai}`;
+
+    document.getElementById("message").innerText =
+        nilai >= 80
+        ? "Hebat! Kamu memahami materi Sistem Komputer."
+        : nilai >= 60
+        ? "Bagus! Terus tingkatkan pemahamanmu."
+        : "Tetap semangat belajar dan coba lagi!";
+}
+
+function restartQuiz() {
+    current = 0;
+    score = 0;
+    answered = false;
+
+    document.getElementById("result").style.display = "none";
+    document.getElementById("start").style.display = "block";
+}
+
+</script>
+
 </body>
 </html>
