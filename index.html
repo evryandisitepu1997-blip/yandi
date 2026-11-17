@@ -4,59 +4,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Kuis Informatika - Sistem Komputer</title>
 
 <style>
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
     font-family: Arial, sans-serif;
 }
 
 body {
-    background: linear-gradient(135deg, #141e30, #243b55);
+    margin: 0;
+    padding: 20px;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    background: linear-gradient(135deg,#141e30,#243b55);
 }
 
 .container {
     background: white;
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     padding: 30px;
-    border-radius: 20px;
+    border-radius: 18px;
     box-shadow: 0 10px 30px #0005;
 }
 
 h1 {
     text-align: center;
     color: #243b55;
-    margin-bottom: 15px;
 }
 
 .subtitle {
     text-align: center;
     color: #666;
-    margin-bottom: 25px;
 }
 
 .info {
     background: #eaf2ff;
     padding: 15px;
     border-radius: 10px;
-    margin-bottom: 20px;
-    line-height: 1.7;
+    line-height: 1.8;
+    margin: 20px 0;
 }
 
 button {
     width: 100%;
     padding: 14px;
     border: none;
-    border-radius: 10px;
+    border-radius: 9px;
     background: #2563eb;
     color: white;
     font-size: 16px;
@@ -68,31 +66,30 @@ button:hover {
     background: #1d4ed8;
 }
 
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
 .option {
     background: #f1f5f9;
     color: #222;
-    border: 2px solid transparent;
     text-align: left;
-    margin-top: 12px;
+    border: 2px solid transparent;
 }
 
 .option:hover {
     background: #dbeafe;
 }
 
-.option:disabled {
-    cursor: default;
-    opacity: 1;
+.correct {
+    background: #bbf7d0 !important;
+    border-color: #16a34a !important;
 }
 
-.option.correct {
-    background: #bbf7d0;
-    border-color: #16a34a;
-}
-
-.option.wrong {
-    background: #fecaca;
-    border-color: #dc2626;
+.wrong {
+    background: #fecaca !important;
+    border-color: #dc2626 !important;
 }
 
 #quiz, #result {
@@ -100,35 +97,48 @@ button:hover {
 }
 
 .progress {
-    background: #ddd;
     height: 10px;
+    background: #ddd;
     border-radius: 10px;
     margin: 15px 0;
 }
 
 .progress-bar {
-    background: #2563eb;
     height: 10px;
     width: 0%;
+    background: #2563eb;
     border-radius: 10px;
+    transition: .3s;
 }
 
 #question {
-    margin: 20px 0;
+    margin: 25px 0;
     line-height: 1.5;
 }
 
 #feedback {
-    margin-top: 15px;
-    font-weight: bold;
     text-align: center;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.warning {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #ef4444;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 15px 0;
+    display: none;
+    font-weight: bold;
 }
 
 .score {
-    text-align: center;
-    font-size: 24px;
+    font-size: 28px;
     color: #2563eb;
-    margin: 20px;
+    text-align: center;
+    font-weight: bold;
 }
 </style>
 </head>
@@ -137,238 +147,399 @@ button:hover {
 
 <div class="container">
 
-    <div id="start">
-        <h1>💻 Kuis Informatika</h1>
-        <p class="subtitle">Materi: Sistem Komputer</p>
+<!-- HALAMAN AWAL -->
 
-        <div class="info">
-            <b>Petunjuk Kuis:</b>
-            <p>📌 Jumlah soal: 10</p>
-            <p>📌 Bentuk soal: Pilihan ganda</p>
-            <p>📌 Pilih satu jawaban yang benar</p>
-            <p>📌 Nilai dihitung secara otomatis</p>
-        </div>
+<div id="start">
 
-        <button onclick="startQuiz()">Mulai Kuis</button>
-    </div>
+<h1>💻 KUIS INFORMATIKA</h1>
 
-    <div id="quiz">
-        <h1>📝 Kerjakan Soal</h1>
-        <p id="number"></p>
+<p class="subtitle">
+Materi Pembelajaran: Sistem Komputer
+</p>
 
-        <div class="progress">
-            <div class="progress-bar" id="bar"></div>
-        </div>
+<div class="info">
+<b>Petunjuk Pengerjaan:</b>
+<p>📌 Jumlah soal: 10</p>
+<p>📌 Bentuk soal: Pilihan ganda</p>
+<p>📌 Pilih satu jawaban yang benar</p>
+<p>📌 Jawaban diperiksa secara otomatis</p>
+<p>📌 Jangan berpindah tab saat mengerjakan</p>
+</div>
 
-        <h3 id="question"></h3>
-        <div id="options"></div>
-
-        <p id="feedback"></p>
-
-        <button id="next" onclick="nextQuestion()" disabled>
-            Soal Berikutnya
-        </button>
-    </div>
-
-    <div id="result">
-        <h1>🎉 Kuis Selesai!</h1>
-        <p class="score" id="score"></p>
-        <p id="message" style="text-align:center"></p>
-        <button onclick="restartQuiz()">Ulangi Kuis</button>
-    </div>
+<button onclick="startQuiz()">MULAI KUIS</button>
 
 </div>
 
+
+<!-- HALAMAN KUIS -->
+
+<div id="quiz">
+
+<h1>📝 KUIS SISTEM KOMPUTER</h1>
+
+<div class="warning" id="warningBox">
+⚠️ Peringatan: Kamu telah berpindah tab!
+</div>
+
+<p id="warningCount">
+Jumlah peringatan: 0
+</p>
+
+<p id="number"></p>
+
+<div class="progress">
+<div class="progress-bar" id="bar"></div>
+</div>
+
+<h3 id="question"></h3>
+
+<div id="options"></div>
+
+<p id="feedback"></p>
+
+<button id="next" onclick="nextQuestion()" disabled>
+SOAL BERIKUTNYA
+</button>
+
+</div>
+
+
+<!-- HALAMAN HASIL -->
+
+<div id="result">
+
+<h1>🎉 KUIS SELESAI!</h1>
+
+<p class="score" id="score"></p>
+
+<p id="message" style="text-align:center"></p>
+
+<p id="finalWarning" style="text-align:center"></p>
+
+<button onclick="restartQuiz()">
+ULANGI KUIS
+</button>
+
+</div>
+
+</div>
+
+
 <script>
 
+// DATABASE SOAL
+
 const questions = [
+
 {
-    q: "Apa yang dimaksud dengan sistem komputer?",
-    a: [
-        "Kumpulan perangkat untuk bermain game",
-        "Gabungan hardware, software, dan brainware",
-        "Program untuk mengetik",
-        "Jaringan internet"
-    ],
-    correct: 1
+q:"Apa yang dimaksud dengan sistem komputer?",
+a:[
+"Kumpulan perangkat untuk bermain game",
+"Gabungan hardware, software, dan brainware",
+"Program untuk mengetik",
+"Jaringan internet"
+],
+correct:1
 },
+
 {
-    q: "Perangkat keras komputer disebut juga...",
-    a: ["Software", "Brainware", "Hardware", "Malware"],
-    correct: 2
+q:"Perangkat keras komputer disebut...",
+a:["Software","Brainware","Hardware","Malware"],
+correct:2
 },
+
 {
-    q: "Manakah yang termasuk perangkat input?",
-    a: ["Monitor", "Printer", "Keyboard", "Speaker"],
-    correct: 2
+q:"Manakah yang termasuk perangkat input?",
+a:["Monitor","Printer","Keyboard","Speaker"],
+correct:2
 },
+
 {
-    q: "Apa fungsi utama CPU?",
-    a: [
-        "Mencetak dokumen",
-        "Mengolah instruksi dan data",
-        "Menampilkan gambar",
-        "Menyimpan file secara permanen"
-    ],
-    correct: 1
+q:"Apa fungsi utama CPU?",
+a:[
+"Mencetak dokumen",
+"Mengolah instruksi dan data",
+"Menampilkan gambar",
+"Menyimpan file permanen"
+],
+correct:1
 },
+
 {
-    q: "RAM merupakan jenis memori yang...",
-    a: [
-        "Menyimpan data sementara",
-        "Menyimpan data secara permanen",
-        "Menghasilkan suara",
-        "Menghubungkan komputer ke internet"
-    ],
-    correct: 0
+q:"RAM merupakan jenis memori yang...",
+a:[
+"Menyimpan data sementara",
+"Menyimpan data permanen",
+"Menghasilkan suara",
+"Menghubungkan internet"
+],
+correct:0
 },
+
 {
-    q: "Manakah yang termasuk perangkat output?",
-    a: ["Mouse", "Keyboard", "Scanner", "Monitor"],
-    correct: 3
+q:"Manakah perangkat output?",
+a:["Mouse","Keyboard","Scanner","Monitor"],
+correct:3
 },
+
 {
-    q: "Contoh perangkat lunak sistem adalah...",
-    a: ["Microsoft Word", "Windows", "Photoshop", "PowerPoint"],
-    correct: 1
+q:"Contoh perangkat lunak sistem adalah...",
+a:[
+"Microsoft Word",
+"Windows",
+"Photoshop",
+"PowerPoint"
+],
+correct:1
 },
+
 {
-    q: "Orang yang menggunakan dan mengoperasikan komputer disebut...",
-    a: ["Hardware", "Software", "Brainware", "Firmware"],
-    correct: 2
+q:"Orang yang mengoperasikan komputer disebut...",
+a:["Hardware","Software","Brainware","Firmware"],
+correct:2
 },
+
 {
-    q: "Apa fungsi motherboard?",
-    a: [
-        "Menghubungkan komponen-komponen komputer",
-        "Mencetak gambar",
-        "Menyimpan listrik",
-        "Menghasilkan suara"
-    ],
-    correct: 0
+q:"Apa fungsi motherboard?",
+a:[
+"Menghubungkan komponen komputer",
+"Mencetak gambar",
+"Menyimpan listrik",
+"Menghasilkan suara"
+],
+correct:0
 },
+
 {
-    q: "Manakah media penyimpanan data?",
-    a: ["Monitor", "SSD", "Keyboard", "Speaker"],
-    correct: 1
+q:"Manakah media penyimpanan data?",
+a:["Monitor","SSD","Keyboard","Speaker"],
+correct:1
 }
+
 ];
+
+
+// VARIABEL
 
 let current = 0;
 let score = 0;
 let answered = false;
+let warningCount = 0;
+let quizActive = false;
 
-function startQuiz() {
-    document.getElementById("start").style.display = "none";
-    document.getElementById("quiz").style.display = "block";
-    showQuestion();
+
+// MEMULAI KUIS
+
+function startQuiz(){
+
+current = 0;
+score = 0;
+warningCount = 0;
+answered = false;
+quizActive = true;
+
+document.getElementById("start").style.display = "none";
+document.getElementById("result").style.display = "none";
+document.getElementById("quiz").style.display = "block";
+
+document.getElementById("warningBox").style.display = "none";
+
+updateWarning();
+
+showQuestion();
+
 }
 
-function showQuestion() {
-    answered = false;
 
-    let q = questions[current];
+// MENAMPILKAN SOAL
 
-    document.getElementById("number").innerText =
-        `Soal ${current + 1} dari ${questions.length}`;
+function showQuestion(){
 
-    document.getElementById("bar").style.width =
-        ((current) / questions.length * 100) + "%";
+answered = false;
 
-    document.getElementById("question").innerText = q.q;
+let q = questions[current];
 
-    document.getElementById("feedback").innerText = "";
+document.getElementById("number").innerText =
+"Soal " + (current+1) + " dari " + questions.length;
 
-    document.getElementById("next").disabled = true;
+document.getElementById("question").innerText = q.q;
 
-    const options = document.getElementById("options");
-    options.innerHTML = "";
+document.getElementById("feedback").innerText = "";
 
-    q.a.forEach((answer, index) => {
-        const btn = document.createElement("button");
+document.getElementById("bar").style.width =
+(current/questions.length*100)+"%";
 
-        btn.innerText =
-            String.fromCharCode(65 + index) + ". " + answer;
+let options = document.getElementById("options");
 
-        btn.className = "option";
+options.innerHTML = "";
 
-        btn.onclick = () => checkAnswer(index, btn);
+document.getElementById("next").disabled = true;
 
-        options.appendChild(btn);
-    });
+document.getElementById("next").innerText =
+current === questions.length-1
+? "LIHAT HASIL"
+: "SOAL BERIKUTNYA";
+
+q.a.forEach((answer,index)=>{
+
+let btn = document.createElement("button");
+
+btn.innerText =
+String.fromCharCode(65+index)+". "+answer;
+
+btn.className = "option";
+
+btn.onclick = ()=>checkAnswer(index,btn);
+
+options.appendChild(btn);
+
+});
+
 }
 
-function checkAnswer(index, selectedButton) {
-    if (answered) return;
 
-    answered = true;
+// MEMERIKSA JAWABAN
 
-    const correct = questions[current].correct;
-    const buttons = document.querySelectorAll(".option");
+function checkAnswer(index,selectedButton){
 
-    buttons.forEach(btn => btn.disabled = true);
+if(answered) return;
 
-    if (index === correct) {
-        score++;
-        selectedButton.classList.add("correct");
+answered = true;
 
-        document.getElementById("feedback").innerText =
-            "✅ Jawaban Benar!";
-    } else {
-        selectedButton.classList.add("wrong");
-        buttons[correct].classList.add("correct");
+let correct = questions[current].correct;
 
-        document.getElementById("feedback").innerText =
-            "❌ Jawaban Salah! Jawaban yang benar: " +
-            questions[current].a[correct];
-    }
+let buttons = document.querySelectorAll(".option");
 
-    document.getElementById("next").disabled = false;
-    document.getElementById("bar").style.width =
-        ((current + 1) / questions.length * 100) + "%";
+buttons.forEach(btn=>btn.disabled=true);
 
-    document.getElementById("next").innerText =
-        current === questions.length - 1
-        ? "Lihat Hasil"
-        : "Soal Berikutnya";
+if(index===correct){
+
+score++;
+
+selectedButton.classList.add("correct");
+
+document.getElementById("feedback").innerText =
+"✅ Jawaban kamu benar!";
+
+}else{
+
+selectedButton.classList.add("wrong");
+
+buttons[correct].classList.add("correct");
+
+document.getElementById("feedback").innerText =
+"❌ Jawaban salah! Jawaban benar: "+
+questions[current].a[correct];
+
 }
 
-function nextQuestion() {
-    if (!answered) return;
+document.getElementById("next").disabled=false;
 
-    current++;
+document.getElementById("bar").style.width =
+((current+1)/questions.length*100)+"%";
 
-    if (current < questions.length) {
-        showQuestion();
-    } else {
-        showResult();
-    }
 }
 
-function showResult() {
-    document.getElementById("quiz").style.display = "none";
-    document.getElementById("result").style.display = "block";
 
-    let nilai = score / questions.length * 100;
+// SOAL BERIKUTNYA
 
-    document.getElementById("score").innerText =
-        `Nilai Kamu: ${nilai}`;
+function nextQuestion(){
 
-    document.getElementById("message").innerText =
-        nilai >= 80
-        ? "Hebat! Kamu memahami materi Sistem Komputer."
-        : nilai >= 60
-        ? "Bagus! Terus tingkatkan pemahamanmu."
-        : "Tetap semangat belajar dan coba lagi!";
+if(!answered) return;
+
+current++;
+
+if(current<questions.length){
+
+showQuestion();
+
+}else{
+
+showResult();
+
 }
 
-function restartQuiz() {
-    current = 0;
-    score = 0;
-    answered = false;
+}
 
-    document.getElementById("result").style.display = "none";
-    document.getElementById("start").style.display = "block";
+
+// HASIL AKHIR
+
+function showResult(){
+
+quizActive = false;
+
+document.getElementById("quiz").style.display="none";
+
+document.getElementById("result").style.display="block";
+
+let nilai = score/questions.length*100;
+
+document.getElementById("score").innerText =
+"Nilai: "+nilai;
+
+document.getElementById("message").innerText =
+nilai>=80
+? "Hebat! Kamu memahami materi Sistem Komputer."
+: nilai>=60
+? "Bagus! Terus tingkatkan kemampuanmu."
+: "Tetap semangat belajar dan coba lagi!";
+
+document.getElementById("finalWarning").innerText =
+"Jumlah perpindahan tab yang terdeteksi: "+warningCount;
+
+}
+
+
+// FITUR PERINGATAN PINDAH TAB
+
+document.addEventListener("visibilitychange",function(){
+
+if(!quizActive) return;
+
+if(document.visibilityState==="hidden"){
+
+warningCount++;
+
+updateWarning();
+
+}
+
+});
+
+
+// MEMPERBARUI PERINGATAN
+
+function updateWarning(){
+
+document.getElementById("warningCount").innerText =
+"Jumlah peringatan: "+warningCount;
+
+if(warningCount>0){
+
+let box = document.getElementById("warningBox");
+
+box.style.display="block";
+
+box.innerText =
+"⚠️ PERINGATAN KE-"+warningCount+
+"! Kamu terdeteksi meninggalkan halaman kuis. "+
+"Silakan kembali mengerjakan kuis.";
+
+}
+
+}
+
+
+// MENGULANGI KUIS
+
+function restartQuiz(){
+
+quizActive = false;
+
+document.getElementById("result").style.display="none";
+
+document.getElementById("start").style.display="block";
+
 }
 
 </script>
